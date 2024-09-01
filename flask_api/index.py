@@ -1,10 +1,18 @@
 from flask import jsonify
 from . import app
+from .helper import create_connection
 
 @app.route("/test", methods=['GET'])
 def test():
+    appointments = []
+
+    db = create_connection()
+    appointments = db.execute(f"""
+                      SELECT * FROM appointments;
+                      """).fetchall()
+    
     return jsonify({
-        "test": "test"
+        "appointments": appointments
     })
     
 if __name__ == '__main__':
