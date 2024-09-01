@@ -4,15 +4,15 @@ from .helper import create_connection
 
 @app.route("/test", methods=['GET'])
 def test():
-    appointments = []
+    coaches = []
 
     db = create_connection()
-    appointments = db.execute(f"""
-                      SELECT * FROM appointments;
+    coaches = db.execute(f"""
+                      SELECT * FROM coaches;
                       """).fetchall()
     
     return jsonify({
-        "appointments": appointments
+        "test": coaches
     })
     
 if __name__ == '__main__':
