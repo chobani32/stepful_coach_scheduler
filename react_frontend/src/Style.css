@@ -23,4 +23,15 @@ ul {
   outline-width: .5px;
 }
 
+.b_selected {
+  height:50px;
+  width:200px;
+  background-color:rgb(6, 121, 6)
+}
+
+.b_unselected {
+  height:50px;
+  width:200px;
+}
+
 

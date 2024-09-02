@@ -4,7 +4,7 @@ import {
   Route,
 } from "react-router-dom";
 
-import Index from "./Components/Index";
+import Login from "./Components/Login";
 import Coach from "./Components/Coach";
 import Student from "./Components/Student";
 
@@ -14,7 +14,7 @@ function App() {
       <Routes>
         <Route
           path="/"
-          element={<Index/>}
+          element={<Login/>}
         />
         <Route
           path="student/:id"
