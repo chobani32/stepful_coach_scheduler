@@ -1,14 +1,46 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from 'react-router-dom';
 import { format } from 'date-fns';
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css';
 import '../Style.css';
 
-function Index() {
+function Coach() {
     let { id } = useParams();
     const [phoneNumber, setPhoneNumber] = useState("")
     const [apts, setApts] = useState([])
     const [pastApts, setPastApts] = useState([])
     const [openSlots, setOpenSlots] = useState([])
+    const [date, setDate] = useState(new Date());
+    const [time, setTime] = useState(0);
+    const [timeAdd, setTimeAdd] = useState(0);
+    const [slotAdded, setSlotAdded] = useState(true);
+    const [reason, setReason] = useState(true);
+
+    const handleAddSlot = () => {
+        // ADDS "coach" to beginning of url?
+        fetch("open_slots/" + id, {
+          method: "POST",
+          body: JSON.stringify({
+            "coach_id": id,
+            "date": date,
+            "time": (+time + +timeAdd)
+          })
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+            setOpenSlots(data.open_slots);
+            setSlotAdded(data.slot_added)
+            setReason(data.reason)
+          })
+          .catch((error) => console.log(error));
+      }
+
+      useEffect(() => {
+        console.log("selected date: " + date)
+        console.log("selected time: " + (+time + +timeAdd))
+      }, [date, time, timeAdd]);
 
     useEffect(() => {
         fetch("/coach/" + id, {
@@ -61,6 +93,24 @@ function Index() {
                         </div>
                     ))}
                 </ul>
+                <h2>Add new slot</h2>
+                <DatePicker selected={date} onChange={(date) => setDate(date)} />
+                <select value={time} onChange={(c) => setTime(c.target.value)}>
+                    <option value="" selected disabled hidden>Time</option>
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(h => (
+                        <option value={h}>{h}</option>
+                    ))}
+                </select>
+                <select value={timeAdd} onChange={(c) => setTimeAdd(c.target.value)}>
+                    <option value={0}>AM</option>
+                    <option value={12}>PM</option>
+                </select>
+                <button onClick={handleAddSlot}>Add Slot</button>
+                {(() => {
+                    if (slotAdded === false) {
+                        return <div color="red">Unable to add slot because {reason}</div>
+                    }
+                })()}
             </div>
 
 
@@ -78,28 +128,45 @@ function Index() {
                             <b>Rating: </b>
                             {(() => {
                                 if (p[2] == null) {
-                                    return <>TODO</>
+                                    return <>
+                                    <select>
+                                    <option value="" selected disabled hidden>Rating</option>
+                                    {[1, 2, 3, 4, 5].map(r => (
+                                        <option value={r}>{r}</option>
+                                    ))}
+                                    </select>
+                                    </>
                                 } else {
                                     return <>{p[2]}</>
                                 }
                             })()}
                             <br></br>
                             <b>Review: </b>
+                            {/* TODO SUBMIT */}
                             {(() => {
                                 if (p[3] == null) {
-                                    return <>TODO</>
+                                    return <>
+                                    <input type="text">
+                                    </input>
+                                    </>
                                 } else {
                                     return <>{p[3]}</>
+                                }
+                            })()}
+                            <br></br>
+                            {(() => {
+                                if (p[2] == null || p[3] == null) {
+                                    return <>
+                                    <button>Submit</button>
+                                    </>
                                 }
                             })()}
                         </div>
                     ))}
                 </ul>
             </div>
-
-
         </div>
     );
 }
 
-export default Index;
+export default Coach;

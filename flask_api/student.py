@@ -14,6 +14,10 @@ def student(student_id):
                       SELECT phone_number FROM students
                       WHERE id is "{student_id}";
                       """).fetchone()
+    coaches = [c[0] for c in db.execute(f"""
+               SELECT id
+               FROM coaches;
+               """).fetchall()]
     if (phone_number != None):
         appointments = db.execute(f"""
                       SELECT a.start_time, a.coach_id, c.phone_number 
@@ -28,6 +32,7 @@ def student(student_id):
             "student_id": student_id,
             "phone_number": phone_number[0],
             "appointments": appointments,
+            "coaches_list": coaches
         })
     
     print(f"No student data found for {student_id}")

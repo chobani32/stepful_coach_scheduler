@@ -50,6 +50,7 @@ def coach_open_slots(coach_id):
 
     slot_added = False
     open_slots = get_open_slots(db, coach_id)
+    reason = ""
 
     # add open slot
     if request.method == 'POST':
@@ -63,14 +64,17 @@ def coach_open_slots(coach_id):
 
         add_new_slot = True
 
+        if new_slot_start_time <= datetime.now() or new_slot_end_time <= datetime.now():
+            add_new_slot = False
+            reason = "slot in the past"
+        print(f"new start: {new_slot_start_time}")
+        print(f"new end: {new_slot_end_time}")
         for s in open_slots:
             start_time = datetime.strptime(s, '%Y-%m-%d %H:%M:%S')
             end_time = start_time + timedelta(hours=2)
-            if new_slot_end_time > start_time:
+            if (new_slot_end_time > start_time and new_slot_end_time <= end_time) or new_slot_start_time < end_time and new_slot_start_time >= start_time:
                 add_new_slot = False
-                break
-            if new_slot_start_time < end_time:
-                add_new_slot = False
+                reason = f"slot conflicts with another slot: {new_slot_start_time.strftime('%Y-%m-%d %H:%M:%S')}"
                 break
 
         if add_new_slot:
@@ -86,7 +90,8 @@ def coach_open_slots(coach_id):
     return jsonify({
             "coach_id": coach_id,
             "open_slots": get_open_slots(db, coach_id),
-            "slot_added": slot_added
+            "slot_added": slot_added,
+            "reason": reason,
         })
 
 
