@@ -34,3 +34,12 @@ def update_appointments(db):
     db.commit()
 
     print("Appointments updated")
+
+def get_open_slots(db, coach_id):
+    return [s[0] for s in db.execute(f"""
+                      SELECT start_time 
+                      FROM appointments
+                      WHERE coach_id is "{coach_id}"
+                      AND student_id is null
+                      ORDER BY start_time ASC;
+                      """).fetchall()]

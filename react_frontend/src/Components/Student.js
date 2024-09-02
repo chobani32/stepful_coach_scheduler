@@ -12,6 +12,24 @@ function Student() {
     const [selectedCoach, setSelectedCoach] = useState("")
     const [coachingSlots, setCoachingSlots] = useState([])
 
+    const handleScheduleApt = ((startTime) => {
+        fetch("/student/schedule", {
+            method: "POST",
+            body: JSON.stringify({
+                "coach_id": selectedCoach,
+                "student_id": id,
+                "start_time": startTime,
+              })
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log(data);
+                setApts(data.appointments)
+                setCoachingSlots(data.open_slots)
+            })
+            .catch((error) => console.log(error));
+    })
+
     useEffect(() => {
         fetch("/student/" + id, {
             method: "GET",
@@ -41,7 +59,7 @@ function Student() {
 
     return (
         <div>
-            <h1 className="center">Coach Portal</h1>
+            <h1 className="center">Student Portal</h1>
             <div className="column">
                 <h2>Student Info</h2>
                 <br></br>
@@ -94,7 +112,7 @@ function Student() {
                                 {coachingSlots.map(s => (
                                     <div className="list">
                                         {format(new Date(s), 'MMM dd, yyyy h a')}
-                                        <button>Schedule</button>
+                                        <button value={s} onClick={(a) => handleScheduleApt(a.target.value)}>Schedule</button>
                                     </div>
                                 ))}
                             </ul>

@@ -20,27 +20,60 @@ function Coach() {
     const handleAddSlot = () => {
         // ADDS "coach" to beginning of url?
         fetch("open_slots/" + id, {
-          method: "POST",
-          body: JSON.stringify({
-            "coach_id": id,
-            "date": date,
-            "time": (+time + +timeAdd)
-          })
+            method: "POST",
+            body: JSON.stringify({
+                "coach_id": id,
+                "date": date,
+                "time": (+time + +timeAdd)
+            })
         })
-          .then((response) => response.json())
-          .then((data) => {
-            console.log(data);
-            setOpenSlots(data.open_slots);
-            setSlotAdded(data.slot_added)
-            setReason(data.reason)
-          })
-          .catch((error) => console.log(error));
-      }
+            .then((response) => response.json())
+            .then((data) => {
+                console.log(data);
+                setOpenSlots(data.open_slots);
+                setSlotAdded(data.slot_added)
+                setReason(data.reason)
+            })
+            .catch((error) => console.log(error));
+    }
 
-      useEffect(() => {
+    const handleSubmitReview = (datetime) => {
+
+        console.log("rating: " + document.getElementById("rating"))
+        console.log("review: " + document.getElementById("review"))
+        console.log("apt_time: " + datetime)
+
+        let rating = 0
+        if (document.getElementById("rating") != null) {
+            rating = document.getElementById("rating").value
+        }
+
+        let review = ""
+        if (document.getElementById("review") != null) {
+            review = document.getElementById("review").value
+        }
+
+        fetch("submit_review/" + id, {
+            method: "POST",
+            body: JSON.stringify({
+                "coach_id": id,
+                "rating": rating,
+                "review": review,
+                "apt_time": datetime,
+            })
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log(data);
+                setPastApts(data.past_appointments)
+            })
+            .catch((error) => console.log(error));
+    }
+
+    useEffect(() => {
         console.log("selected date: " + date)
         console.log("selected time: " + (+time + +timeAdd))
-      }, [date, time, timeAdd]);
+    }, [date, time, timeAdd]);
 
     useEffect(() => {
         fetch("/coach/" + id, {
@@ -123,18 +156,16 @@ function Coach() {
                             <br></br>
                             <b>Starting Time: </b>{format(new Date(p[0]), 'MMM dd, yyyy h a')}
                             <br></br>
-                            <b>Review:</b>
-                            <br></br>
                             <b>Rating: </b>
                             {(() => {
                                 if (p[2] == null) {
                                     return <>
-                                    <select>
-                                    <option value="" selected disabled hidden>Rating</option>
-                                    {[1, 2, 3, 4, 5].map(r => (
-                                        <option value={r}>{r}</option>
-                                    ))}
-                                    </select>
+                                        <select>
+                                            <option id="rating" value={0} selected disabled hidden>Rating</option>
+                                            {[1, 2, 3, 4, 5].map(r => (
+                                                <option id="rating" value={r}>{r}</option>
+                                            ))}
+                                        </select>
                                     </>
                                 } else {
                                     return <>{p[2]}</>
@@ -142,12 +173,11 @@ function Coach() {
                             })()}
                             <br></br>
                             <b>Review: </b>
-                            {/* TODO SUBMIT */}
                             {(() => {
                                 if (p[3] == null) {
                                     return <>
-                                    <input type="text">
-                                    </input>
+                                        <input type="text" id="review">
+                                        </input>
                                     </>
                                 } else {
                                     return <>{p[3]}</>
@@ -157,7 +187,7 @@ function Coach() {
                             {(() => {
                                 if (p[2] == null || p[3] == null) {
                                     return <>
-                                    <button>Submit</button>
+                                        <button onClick={() => handleSubmitReview(p[0])}>Submit</button>
                                     </>
                                 }
                             })()}

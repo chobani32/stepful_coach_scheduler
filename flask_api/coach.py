@@ -1,7 +1,7 @@
 from flask import request, jsonify
 from . import app
 from datetime import datetime, timedelta
-from .helper import create_connection, update_appointments
+from .helper import create_connection, get_open_slots
 
 @app.route("/coach/<string:coach_id>", methods=['GET'])
 def coach(coach_id):
@@ -24,25 +24,52 @@ def coach(coach_id):
                       AND past is false
                       ORDER BY start_time ASC;
                       """).fetchall()
-        past_appointments = db.execute(f"""
-                      SELECT start_time, student_id, rating, review
-                      FROM appointments
-                      WHERE coach_id is "{coach_id}"
-                      AND past is true
-                      ORDER BY start_time DESC;
-                      """).fetchall()
-
 
         return jsonify({
             "coach_id": coach_id,
             "phone_number": phone_number[0],
             "appointments": appointments,
-            "past_appointments": past_appointments,
+            "past_appointments": past_appointments(db, coach_id),
             "open_slots": get_open_slots(db, coach_id),
         })
     
-    print(f"No student data found for {coach_id}")
-    # TODO handle error
+    return jsonify({
+            "coach_id": "No match",
+        })
+
+@app.route("/coach/submit_review/<string:coach_id>", methods=['POST'])
+def submit_review(coach_id):
+    db = create_connection()
+
+    body = request.get_json(force=True)
+    print(body)
+
+    coach_id = body["coach_id"]
+    datetime = body["apt_time"]
+    rating = body["rating"]
+    review = body["review"]
+
+    if rating != 0:
+        db.execute(f"""
+            UPDATE appointments
+            SET rating={rating}
+            WHERE coach_id="{coach_id}"
+            AND start_time="{datetime}"
+        """)
+        db.commit()
+    if review != "":
+        db.execute(f"""
+            UPDATE appointments
+            SET review="{review}"
+            WHERE coach_id="{coach_id}"
+            AND start_time="{datetime}"
+        """)
+        db.commit()
+
+    return jsonify({
+        "coach_id": coach_id,
+        "past_appointments": past_appointments(db, coach_id),
+    })
 
 @app.route("/coach/open_slots/<string:coach_id>", methods=['GET', 'POST'])
 def coach_open_slots(coach_id):
@@ -94,15 +121,17 @@ def coach_open_slots(coach_id):
             "reason": reason,
         })
 
-
-def get_open_slots(db, coach_id):
-    return [s[0] for s in db.execute(f"""
-                      SELECT start_time 
+def past_appointments(db, coach_id):
+   return db.execute(f"""
+                      SELECT start_time, student_id, rating, review
                       FROM appointments
                       WHERE coach_id is "{coach_id}"
-                      AND student_id is null
-                      ORDER BY start_time ASC;
-                      """).fetchall()]
+                      AND past is true
+                      ORDER BY start_time DESC;
+                      """).fetchall()
+
+
+
     
 if __name__ == '__main__':
     app.run(debug=True)
