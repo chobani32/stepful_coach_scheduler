@@ -1,4 +1,26 @@
+ul {
+  padding-left: 0px;
+}
+
 .center {
-    text-align: center;
-    padding: 2%
-  }
+  text-align: center;
+  padding: 2%
+}
+
+.column {
+  padding-left: 50px;
+  float: left;
+}
+
+.left {
+  width: 30%;
+}
+
+.list{
+  padding: 2%;
+  outline-style: solid;
+  outline-color: black;
+  outline-width: .5px;
+}
+
+

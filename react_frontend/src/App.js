@@ -5,6 +5,8 @@ import {
 } from "react-router-dom";
 
 import Index from "./Components/Index";
+import Coach from "./Components/Coach";
+import Student from "./Components/Student";
 
 function App() {
   return (
@@ -14,6 +16,14 @@ function App() {
           path="/"
           element={<Index/>}
         />
+        <Route
+          path="student/:id"
+          element={<Student/>}
+        />
+        <Route
+        path="coach/:id"
+        element={<Coach/>}
+      />
       </Routes>
     </BrowserRouter>
   );

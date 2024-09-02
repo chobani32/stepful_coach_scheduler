@@ -29,7 +29,7 @@ def coach(coach_id):
                       FROM appointments
                       WHERE coach_id is "{coach_id}"
                       AND past is true
-                      ORDER BY start_time ASC;
+                      ORDER BY start_time DESC;
                       """).fetchall()
 
 
